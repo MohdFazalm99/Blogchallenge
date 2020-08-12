@@ -3,9 +3,10 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
+const _ = require('lodash');
 
 const homeStartingContent = "“Blog” is an abbreviated version of “weblog,” which is a term used to describe websites that maintain an ongoing chronicle of information. A blog features diary-type commentary and links to articles on other websites, usually presented as a list of entries in reverse chronological order. Blogs range from the personal to the political, and can focus on one narrow subject or a whole range of subjects."
-const aboutContent = "Hac habitasse platea dictumst vestibulum rhoncus est pellentesque. Dictumst vestibulum rhoncus est pellentesque elit ullamcorper. Non diam phasellus vestibulum lorem sed. Platea dictumst quisque sagittis purus sit. Egestas sed sed risus pretium quam vulputate dignissim suspendisse. Mauris in aliquam sem fringilla. Semper risus in hendrerit gravida rutrum quisque non tellus orci. Amet massa vitae tortor condimentum lacinia quis vel eros. Enim ut tellus elementum sagittis vitae. Mauris ultrices eros in cursus turpis massa tincidunt dui.";
+const aboutContent = "Daily Journal is not like any other platform on the internet. Our sole purpose is to help you find compelling ideas, knowledge, and perspectives. We don’t serve ads—we serve you, the curious reader who loves to learn new things. Daily Journal is home to thousands of independent voices, and we combine humans and technology to find the best reading for you—and filter out the rest."
 const contactContent = "Scelerisque eleifend donec pretium vulputate sapien. Rhoncus urna neque viverra justo nec ultrices. Arcu dui vivamus arcu felis bibendum. Consectetur adipiscing elit duis tristique. Risus viverra adipiscing at in tellus integer feugiat. Sapien nec sagittis aliquam malesuada bibendum arcu vitae. Consequat interdum varius sit amet mattis. Iaculis nunc sed augue lacus. Interdum posuere lorem ipsum dolor sit amet consectetur adipiscing elit. Pulvinar elementum integer enim neque. Ultrices gravida dictum fusce ut placerat orci nulla. Mauris in aliquam sem fringilla ut morbi tincidunt. Tortor posuere ac ut consequat semper viverra nam libero.";
 
 const app = express();
@@ -50,10 +51,10 @@ app.post("/compose",function(req,res){
 
 
 app.get("/posts/:postName", function(req,res){
-const requestedTitle= req.params.postName;
+const requestedTitle= _.lowerCase(req.params.postName);
 
 posts.forEach(function(post){
-  const storedTitle = post.title;
+  const storedTitle = _.lowerCase(post.title);
 
   if(storedTitle === requestedTitle){
     console.log("match found");
