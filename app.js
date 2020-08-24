@@ -3,7 +3,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
-const _ = require('lodash');
+const mongoose = require('mongoose');
 
 const homeStartingContent = "“Blog” is an abbreviated version of “weblog,” which is a term used to describe websites that maintain an ongoing chronicle of information. A blog features diary-type commentary and links to articles on other websites, usually presented as a list of entries in reverse chronological order. Blogs range from the personal to the political, and can focus on one narrow subject or a whole range of subjects."
 const aboutContent = "Daily Journal is not like any other platform on the internet. Our sole purpose is to help you find compelling ideas, knowledge, and perspectives. We don’t serve ads—we serve you, the curious reader who loves to learn new things. Daily Journal is home to thousands of independent voices, and we combine humans and technology to find the best reading for you—and filter out the rest."
@@ -16,62 +16,68 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
-var posts =[];
+mongoose.connect('mongodb://localhost:27017/test', {useNewUrlParser: true, useUnifiedTopology: true});
+const postSchema = {
+  title: String,
+  content: String
+};
 
-app.get("/", function(req,res){
-  res.render("home", {
-    StartingContent:homeStartingContent,
-    posts:posts
+const Post = mongoose.model("Post", postSchema);
+
+app.get("/", function(req, res){
+
+  Post.find({}, function(err, posts){
+    res.render("home", {
+      startingContent: homeStartingContent,
+      posts: posts
+      });
+  });
+});
+
+app.get("/compose", function(req, res){
+  res.render("compose");
+});
+
+app.post("/compose", function(req, res){
+  const post = new Post({
+    title: req.body.postTitle,
+    content: req.body.postBody
+  });
+
+
+  post.save(function(err){
+    if (!err){
+        res.redirect("/");
+    }
+  });
+});
+
+app.get("/posts/:postId", function(req, res){
+
+const requestedPostId = req.params.postId;
+
+  Post.findOne({_id: requestedPostId}, function(err, post){
+    res.render("post", {
+      title: post.title,
+      content: post.content
+    });
   });
 
 });
 
-app.get("/about", function(req,res){
-  res.render("about", {about:aboutContent});
+app.get("/about", function(req, res){
+  res.render("about", {aboutContent: aboutContent});
 });
 
-app.get("/contact", function(req,res){
-  res.render("contact", {contact:contactContent});
+app.get("/contact", function(req, res){
+  res.render("contact", {contactContent: contactContent});
 });
 
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 3000;
+}
 
-app.get("/compose", function(req,res){
-  res.render("compose");
-});
-
-
-app.post("/compose",function(req,res){
-  const post ={
-    title:req.body.postTitile,
-    content:req.body.postBody
-  };
-  posts.push(post);
-  res.redirect("/");
-});
-
-
-app.get("/posts/:postName", function(req,res){
-const requestedTitle= _.lowerCase(req.params.postName);
-
-posts.forEach(function(post){
-  const storedTitle = _.lowerCase(post.title);
-
-  if(storedTitle === requestedTitle){
-
-    res.render("post", {
-      title:post.title,
-      content:post.content
-    });
-  }
-});
-
-});
-
-
-
-
-
-
-app.listen(3000, function() {
-  console.log("Server started on port 3000");
+app.listen(port, function() {
+  console.log("Server has been deployed !");
 });
